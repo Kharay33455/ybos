@@ -2,3 +2,4 @@ yenv
 ybos/db.sqlite3
 ybos/.env
 *pyc
+ybcs.json
