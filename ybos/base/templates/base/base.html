@@ -133,35 +133,22 @@
 
                                             <b>
                                                 <p>
-                                                    CHOOSE OTHER SIGN METHOD
+                                                    SIGN IN WITH GOOGLE INSTEAD?
                                                 </p>
                                             </b>
                                             <div>
                                                 <ul class="list-group">
                                                     <li class="list-group-item">
-                                                        <input class="form-check-input me-1" type="radio"
-                                                            name="listGroupRadio" value="" id="firstRadio" checked>
-                                                        <label class="form-check-label" for="firstRadio">Google</label>
+                                                        <b>
+                                                            <a href="{% url 'base:signIn' 'google' %}">
+                                                                GOOGLE
+                                                            </a>
+                                                        </b>
                                                     </li>
-                                                    <li class="list-group-item">
-                                                        <input class="form-check-input me-1" type="radio"
-                                                            name="listGroupRadio" value="" id="secondRadio">
-                                                        <label class="form-check-label"
-                                                            for="secondRadio">Twitter</label>
-                                                    </li>
-                                                    <li class="list-group-item">
-                                                        <input class="form-check-input me-1" type="radio"
-                                                            name="listGroupRadio" value="" id="thirdRadio">
-                                                        <label class="form-check-label"
-                                                            for="thirdRadio">Facebook</label>
-                                                    </li>
+                                                 
                                                 </ul>
                                             </div>
-                                            <br>
-                                            <div style="display: flex; justify-content: center;">
-                                                
-                                                <button type="button" class="btn btn-info"> PROCEED</button>
-                                            </div>
+                        
                                         </div>
 
                                     </div>
