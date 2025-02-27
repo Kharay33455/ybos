@@ -12,14 +12,14 @@ function animateAuth(_authBox, _type){
         _authBox.style.top = '0vh';
         setTimeout(()=>{
             _authBox.classList.remove('authAnimation');
-        }, 1000);
+        }, 500);
     }
     else{
         _authBox.classList.add('authAnimationReverse')
         _authBox.style.top = '100vh';
         setTimeout(()=>{
             _authBox.classList.remove('authAnimationReverse');
-        }, 1000);  
+        }, 500);  
     }
 }
 

@@ -4,6 +4,8 @@ from django.urls import reverse
 import requests
 # used to get secrets with os.getenv('SECRETE_VALUE')
 import os
+from dotenv import load_dotenv
+
 # get date time
 from datetime import datetime
 from django.http import HttpResponseRedirect, HttpResponse
@@ -12,6 +14,8 @@ from django.http import HttpResponseRedirect, HttpResponse
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
 
+
+load_dotenv()
 # gets the current time
 def getTimeNow():
     timeNow = datetime.now().strftime("%H:%M:%S")
@@ -52,12 +56,12 @@ def getCurrentRate():
 
 
 def googleSignInFunction(request):
-    secrets = {"web": {"client_id": "229371508083-mls99c3b0295kc1v4hq2njg0us53o5bd.apps.googleusercontent.com",
-                        "project_id": "ybos-451917",
+    secrets = {"web": {"client_id": os.getenv('GOOGLE_OAUTH_CLIENT_ID'),
+                        "project_id": os.getenv('GOOGLE_PROJECT_ID'),
                         "auth_uri": "https://accounts.google.com/o/oauth2/auth",
                         "token_uri": "https://oauth2.googleapis.com/token",
                         "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-                        "client_secret": "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",
+                        "client_secret": os.getenv('GOOGLE_OAUTH_CLIENT_SECRETE'),
                         "redirect_uris": [
                             "http://localhost:8000/sign-in/complete/",
                             "http://127.0.0.1:8000/sign-in/complete/",

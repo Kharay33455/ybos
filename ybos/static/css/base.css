@@ -102,11 +102,11 @@
 }
 
 .authAnimation{
-    animation: authA 1s ease-in-out;
+    animation: authA 500ms ease-in-out;
 }
 
 .authAnimationReverse{
-    animation: authA 1s ease-in-out reverse;
+    animation: authA 500ms ease-in-out reverse;
 }
 
 @keyframes authA {
