@@ -1,0 +1,136 @@
+/*LOGO*/
+#logo {
+    /*Size*/
+
+    /*Animate*/
+    width: 5vw;
+    animation: logoA 3s ease-in-out infinite;
+}
+
+/*Animate logo*/
+@keyframes logoA {
+    0% {
+        transform: rotateY(0deg);
+    }
+
+    50% {
+        transform: rotateY(360deg);
+    }
+
+    100% {
+        transform: rotateX(0deg);
+    }
+}
+
+
+
+/* load ing screen */
+#loadingScreen {
+    /*Loading screen must occupy full user screen*/
+    width: 100%;
+    height: 100vh;
+    /*Can't be movedd*/
+    position: fixed;
+    top: 0;
+    left: 0;
+    /*Hidden under other elements temporarily*/
+    z-index: 1;
+    /*Center child elements*/
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    /*A transparent-ish background*/
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+#loading {
+    width: 50vw;
+    animation: logoA 3s ease-in-out infinite;
+}
+
+/*Button template*/
+.ybosButton {
+    background-color: green;
+    width: fit-content;
+    border-radius: 100vw;
+    margin-left: 5%;
+    margin-top: 5%;
+    margin-bottom: 5%;
+}
+
+.ybosButton.orange {
+    background-color: orange;
+}
+
+
+
+/*Footer*/
+.baseFooter {
+    /*Make last on page. Page must be a grid or flex in display*/
+    align-self: last baseline;
+    /*Text color*/
+    color: black;
+    /*Set relative to apply z index to make it stand over the loading screen*/
+    position: relative;
+    z-index: 2;
+    background-color: white;
+}
+
+/*Body excluding footer*/
+#mainBody {
+    /*It should always occupy the screen*/
+    min-height: 100vh;
+    background-color: white;
+    /*Allows us to position the inner footer*/
+    display: grid;
+    /*Invisible till changed by javascript on load*/
+    opacity: 0;
+    /*Allows hovering*/
+    position: relative;
+}
+
+/**/
+.buttonElem {
+    padding: 0.8vw 1.5vw;
+    border-radius: 1.5vw;
+}
+
+#authCont{
+    display: grid;
+    height: 200vh;
+}
+
+.authAnimation{
+    animation: authA 1s ease-in-out;
+}
+
+.authAnimationReverse{
+    animation: authA 1s ease-in-out reverse;
+}
+
+@keyframes authA {
+    0% {
+        opacity: 0;
+        top:100vh
+    }
+
+    100% {
+        opacity:1;
+        top:0vh;
+    }
+}
+
+@media screen and (max-width:600px) {
+    #logo {
+        /*Size*/
+
+        /*Animate*/
+        width: 10vw;
+    }
+
+    .buttonElem {
+        padding: 2vw 5vw;
+        border-radius: 5vw;
+    }
+}

@@ -1,0 +1,57 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block content %}
+
+<head>
+    <link rel="stylesheet" href="{% static 'css/index.css' %}">
+
+</head>
+<section>
+    <div class="indexMain">
+        <div class="pageheader">
+            <h1 style="text-align: center; font-weight: 900;">
+                YOU WAN <span style="color: green;">BUY</span> OR <span style="color: orange;">SELL</span> YUAN? YUAN
+                <span style="color:#E5C268;">BOS</span> DEY FOR YOU.
+
+            </h1>
+
+
+        </div>
+
+    </div>
+    <div style="background-color: white;">
+
+        <div class="card text-center">
+            <div class="card-header">
+                BUY YUAN RATES
+            </div>
+            <div class="card-body">
+                <p class="card-text rates">{{rates.buyRates}}</p>
+                <h5 class="card-title">CNYNGN Live Rates</h5>
+                <a href="#" class="btn btn-success">BUY</a>
+            </div>
+            <div class="card-footer text-body-secondary">
+                {{rates.time}}
+            </div>
+        </div>
+        <br><br>
+        <div class="card text-center">
+            <div class="card-header">
+                SELL YUAN RATES
+            </div>
+            <div class="card-body">
+                <p class="card-text rates">
+                    {{rates.sellRates}}
+                </p>
+
+                <h5 class="card-title">CNYNGN Live Rates</h5>
+                <a href="#" class="btn btn-danger">SELL</a>
+            </div>
+            <div class="card-footer text-body-secondary">
+                {{rates.time}}
+            </div>
+        </div>
+    </div>
+</section>
+<br><br>
+{% endblock %}
