@@ -119,18 +119,20 @@
 
                                     <!--Log in and sign in button-->
                                     <div style="display: flex; justify-content: space-evenly;">
-                                        <p class="buttonElem" style="background-color: green;" onclick="callAuth()">
+                                        <a class="buttonElem" style="background-color: green;" href="{% url 'base:login' %}">
                                             Log In
-                                        </p>
-                                        <p class="buttonElem" style="background-color: orange;" onclick="callAuth()">
+                                        </a>
+                                        <a class="buttonElem" style="background-color: orange;" >
                                             Sign Up
-                                        </p>
+                                        </a>
                                     </div>
                                     <br>
+                                    <div class="center horizontal">
+                                        <button type="button" class="btn btn-info" onclick="callAuth()">Other sign in methods</button>
+                                    </div>
 
                                     <div id ="authCont" style="position:relative; top:100vh">
                                         <div>
-
                                             <b>
                                                 <p>
                                                     SIGN IN WITH GOOGLE INSTEAD?

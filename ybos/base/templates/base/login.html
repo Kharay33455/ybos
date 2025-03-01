@@ -1,0 +1,65 @@
+{% extends 'base/base.html' %}
+{% block content %}
+<div style="text-align:center; font-size:x-large; font-weight:900">
+    Create a new YBOS account
+</div>
+<br /><br />
+{% if err %}
+<p style="color:red; text-align:center" >
+    {{err}}
+</p>
+{% endif %}
+<form class="row g-3 pad" method="post" action="{% url 'base:login' %}">
+    {% csrf_token %}
+    <div class="col-md-6">
+        <label for="inputUsername4" class="form-label">Username</label>
+        <input type="text" class="form-control" id="inputUsername4" name="username" required>
+    </div>
+    <div class="col-md-6">
+        <label for="inputEmail4" class="form-label">Email</label>
+        <input type="email" class="form-control" id="inputEmail4" name="email" required>
+    </div>
+    <div class="col-12">
+        <label for="inputPassword" class="form-label">Password</label>
+        <input type="password" class="form-control" id="inputPassword" placeholder="Choose your password" required name="password">
+    </div>
+    <div class="col-12">
+        <label for="inputPassword2" class="form-label">Password Again</label>
+        <input type="password" class="form-control" id="inputPassword2" placeholder="Verify your password" required>
+    </div>
+    <div class="col-md-6">
+        <label for="inputCity" class="form-label">Address</label>
+        <input type="text" class="form-control" id="inputCity" name="address">
+    </div>
+    <div class="col-md-4">
+        <label for="inputState" class="form-label">State</label>
+        <select id="inputState" class="form-select" name="state">
+            
+            {% for state in nigerian_states %}
+            {% if state == 'Lagos' %}
+            <option value="{{state}}" selected>{{state}}</option>
+            {% else %}
+            <option value="{{state}}">{{state}}</option>
+            {% endif %}
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label for="inputZip" class="form-label">Zip</label>
+        <input type="text" class="form-control" id="inputZip" name="zip">
+    </div>
+    <div class="col-12">
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="gridCheck" required>
+            <label class="form-check-label" for="gridCheck">
+                I understand the <a>terms and conditions</a> and fully agree to them.
+            </label>
+        </div>
+    </div>
+    <div class="col-12">
+        <button type="submit" class="btn btn-primary">Sign in</button>
+    </div>
+</form>
+
+
+{% endblock %}

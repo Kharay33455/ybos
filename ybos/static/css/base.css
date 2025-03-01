@@ -109,6 +109,24 @@
     animation: authA 500ms ease-in-out reverse;
 }
 
+.center{
+    display:flex;
+}
+.center.vertical{
+    align-items:center;
+}
+.pad{
+    padding-left:5vw;
+    padding-right:5vw;
+    height:100vh;
+}
+.center.horizontal{
+    justify-content:center;
+}
+.btn-info{
+    color:white;
+}
+
 @keyframes authA {
     0% {
         opacity: 0;
