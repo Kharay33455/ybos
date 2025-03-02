@@ -18,15 +18,6 @@
     font-weight: '900';
 }
 
-.buttonElem{
-    cursor:pointer;
-    color:white;
-    text-decoration:none;
-}
-
-.buttonElem:visited{
-    color:white;
-}
 
 /* mobile */
 @media screen and (max-width:600px){

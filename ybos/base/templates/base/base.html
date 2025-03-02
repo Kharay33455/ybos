@@ -119,10 +119,10 @@
 
                                     <!--Log in and sign in button-->
                                     <div style="display: flex; justify-content: space-evenly;">
-                                        <a class="buttonElem" style="background-color: green;" href="{% url 'base:login' %}">
+                                        <a class="buttonElem" style="background-color: green;" href="">
                                             Log In
                                         </a>
-                                        <a class="buttonElem" style="background-color: orange;" >
+                                        <a class="buttonElem" style="background-color: orange;" href="{% url 'base:ybosSignIn' %}">
                                             Sign Up
                                         </a>
                                     </div>
@@ -182,6 +182,7 @@
     </div>
     <!-- Scripts -->
     <script src="{% static 'js/base.js' %}"></script>
+    <script src="{% static 'js/login.js' %}"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js
     "></script>
 </body>

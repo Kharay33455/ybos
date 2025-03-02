@@ -6,5 +6,6 @@ app_name = 'base'
 urlpatterns = [
     path('', index, name='index'),
     path('sign-in/<slug:method>/', signIn, name = 'signIn'),
-    path('login/', loginRequest, name='login'),
+    path('ybos/', registrationRequest, name='ybosSignIn'),
+    path('completeSignIn/', completeSignIn, name='complete')
 ]

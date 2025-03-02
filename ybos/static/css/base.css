@@ -109,6 +109,17 @@
     animation: authA 500ms ease-in-out reverse;
 }
 
+
+.buttonElem{
+    cursor:pointer;
+    color:white;
+    text-decoration:none;
+}
+
+.buttonElem:visited{
+    color:white;
+}
+
 .center{
     display:flex;
 }

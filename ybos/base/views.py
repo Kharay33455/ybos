@@ -14,6 +14,10 @@ from django.http import HttpResponseRedirect, HttpResponse
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
 
+# user creation
+from django.contrib.auth.forms import UserCreationForm
+
+
 
 load_dotenv()
 # gets the current time
@@ -91,50 +95,6 @@ def googleSignInFunction(request):
     print('here')
     return authorization_url
 
-# validator
-def validate(request, postData, dataType):
-    postData = str(postData).strip()
-
-    # make sure needed data is in list
-    acceptableChars = [
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K',
-    'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V',
-    'W', 'X', 'Y', 'Z','a', 'b', 'c', 'd', 'e', 'f', 'g', 
-    'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
-    's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 1,2,3,4,5,6,7,8,9,0,'@', '.', ',']
-    if dataType != 'Password':
-        for char in postData:
-            if char not in acceptableChars:
-                err = f'You cannot use "{char}" in your {dataType}.'
-                return {'status' : -99, 'err' : err}
-
-    # make sure req data is not blank
-    if dataType == 'Username' or dataType == 'Password' or dataType == 'Email':
-        if postData == "":
-            err =  f'{dataType} cannot be blank.'
-            return {'status' : -99 , 'err' : err}
-
-    if dataType == 'Password' and len(postData) < 10:
-        print('here')
-        err =  f'{dataType} must be at least 10 characters.'
-        return {'status' : -99 , 'err' : err}
-
-    
-    return {'status' : 0 ,'val' : postData}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 # index
 def index(request):
@@ -162,55 +122,18 @@ def completeSignIn(request):
     return HttpResponseRedirect('Signed in')
 
 
-def loginRequest(request):
+def registrationRequest(request):
     nigerian_states = [
         "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue", "Borno", 
         "Cross River", "Delta", "Ebonyi", "Edo", "Ekiti", "Enugu", "Gombe", "Imo", "Jigawa", 
         "Kaduna", "Kano", "Katsina", "Kebbi", "Kogi", "Kwara", "Lagos", "Nasarawa", "Niger", 
-        "Ogun", "Ondo", "Osun", "Oyo", "Plateau", "Rivers", "Sokoto", "Taraba", "Yobe", "Zamfara"
-    ]
+        "Ogun", "Ondo", "Osun", "Oyo", "Plateau", "Rivers", "Sokoto", "Taraba", "Yobe", "Zamfara"]
     if request.method == 'POST':
-        username = validate(request, request.POST['username'], 'Username')
-        
-        if username['status'] != 0:
-            print(username['status'])
-            context = {'err' : username['err'], 'nigerian_states': nigerian_states}
-            return render(request, 'base/login.html', context )
-        else:
-            username = username['val']
-        
-        email = validate(request, request.POST['email'] , 'Email')
-        if email['status'] !=0:
-
-            context = {'err':email['err'], 'nigerian_states': nigerian_states}
-            return render(request, 'base/login.html', context )
-        else:
-            email = email['val']
-        print(email)
-        password = validate(request, request.POST['password'] , 'Password')
-        if password['status'] !=0:
-            context = {'err':password['err'], 'nigerian_states': nigerian_states}
-            return render(request, 'base/login.html', context )
-        else:
-            password = password['val']
-        address = validate(request, request.POST['address'], 'Address')
-        if address['status'] !=0:
-            context = {'err':address['err'], 'nigerian_states': nigerian_states}
-            return render(request, 'base/login.html', context )
-        else:
-            address = address['val']
-        state = validate(request, request.POST['state'], 'State')
-        if state['status'] !=0:
-            context = {'err':state['err'], 'nigerian_states': nigerian_states}
-            return render(request, 'base/login.html', context )
-        else:
-            state = state['val']
-        zipCode = validate(request, request.POST['zip'], 'Zip')
-        if zipCode['status'] !=0:
-            context = {'err':zipCode['err'], 'nigerian_states': nigerian_states}
-            return render(request, 'base/login.html', context )
-        else:
-            zipCode = zipCode['val']
-
-    context = {'nigerian_states' : nigerian_states}
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()  
+            return HttpResponseRedirect(reverse('base:complete'))
+    else:
+        form = UserCreationForm()
+    context = {'nigerian_states' : nigerian_states, 'form': form}
     return render(request, 'base/login.html', context)
