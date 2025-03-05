@@ -114,7 +114,13 @@
                                     </li>
                                 </ul>
 
+{% if request.user.is_authenticated %}
 
+        <div style="font-size:xx-large; color:white; background-color:#E5C268; width:fit-content; padding:2%; border-radius:20%;">
+            {{request.user.username | slice:":1" | capfirst}}
+        </div>
+
+{% else %}
                                 <div>
 
                                     <!--Log in and sign in button-->
@@ -156,7 +162,7 @@
                                     </div>
 
                                 </div>
-
+{% endif %}
 
 
                             </div>

@@ -20,3 +20,16 @@ label{
     margin-left:2vw;
     margin-bottom:1vh;
 }
+
+
+#msg{
+    color:green;
+    font-weight:900;
+    font-size:larger;
+}
+
+#err{
+    color:red;
+    font-weight:900;
+    font-size:larger;
+}

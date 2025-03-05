@@ -1,0 +1,10 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/reg.css' %}" />
+<div>
+    <p id="err" style="text-align:center">
+        {{err}}. You can go back and try again.
+    </p>
+</div>
+{% endblock %}
