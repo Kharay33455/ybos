@@ -1,45 +1,37 @@
-from django.shortcuts import render
-from django.urls import reverse
-# used to query API
-import requests
-# used to get secrets with os.getenv('SECRETE_VALUE')
-import os
-from dotenv import load_dotenv
-import string
-from django.contrib.auth.models import User
-from .models import *
-import random
-from django.contrib.auth import authenticate, login, logout
+# django modules
+from django.shortcuts import render # to render html
+from django.urls import reverse # generate url related to app only
+from django.contrib.auth.models import User # user model
+from django.contrib.auth import authenticate, login, logout # handle auth
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse # responses
+from django.contrib.auth.forms import UserCreationForm # user creation form
 
-# get date time
-from datetime import datetime
-from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
+# python modules
+import requests # used to query API
+import os # the module to access the operating system
+from dotenv import load_dotenv # python evn package
+import string # contains all chars in ASCII
+from .models import * # Database schema
+import random # for randomization of all sorts
+from datetime import datetime # get date time
 
-# import google auth libraries
+# google auth libraries
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
 
-# user creation
-from django.contrib.auth.forms import UserCreationForm
-
-
-
+# load our environmental variables
 load_dotenv()
 
-# check when last user requested code
+# check when last user requested code. Takes time now, time to compare and the duration period.
 def checkHasRequested(time_now, updated, duration):
-    value = True
-    print(time_now.minute, updated.minute)
-    print(time_now.hour, updated.hour)
-    # if it't not the same day
-    if time_now.day != updated.day:
+    if time_now.day != updated.day: # if it't not the same day
         value = False
         return value
-    if time_now.hour != updated.hour:
+    if time_now.hour != updated.hour:# if it's not the same hour
         value = False
         return value
-    if time_now.minute - updated.minute < duration:
-        value = True
+    if time_now.minute - updated.minute < duration: # if day and hour is same, calculate for min
+        value = True # 
     else:
         value = False
     return value
@@ -47,12 +39,12 @@ def checkHasRequested(time_now, updated, duration):
 
 # gets the current time
 def getTimeNow():
-    timeNow = datetime.now().strftime("%H:%M:%S")
+    timeNow = datetime.now().strftime("%H:%M:%S") # get current time in HH MM SS format
     return timeNow
 
 #gets current rates
 def getCurrentRate():
-    # takes a value of hours and checks if it's AM or PM
+    # takes a value of hours and checks if it's AM or PM, normalize hour if in PM.
     def checkTime(_timeVal):
         timeVal = int(_timeVal)
         if timeVal > 12:
@@ -68,14 +60,15 @@ def getCurrentRate():
     #rates_data = requests.get(url)
     #feedback = rates_data.json()
     
-    
+    # test feedback
     feedback = {'success': True, 'terms': 'https://currencylayer.com/terms', 'privacy': 'https://currencylayer.com/privacy', 'timestamp': 1740415631, 'source': 'CNY', 'quotes': {'CNYNGN': 206.807627}}
+    
     # extract rates from data. This is the  buy rate. The sell rate is this minus 10
     buyRates = int(feedback['quotes']['CNYNGN'])
     sellRates = buyRates - 10
     # get the timestamp. Comes as HRMMSS
     _time = getTimeNow()
-    # run the check time function to check if it's a morning or noon return
+    # run the check time function on current Hour value to check if it's a morning or noon return
     timeHour = checkTime(_time[0:2])
     # construct time
     time = timeHour['time'] + ':' + _time[3:5] + ':'+ _time[6:8] +' ' + timeHour['isPM']
@@ -85,6 +78,7 @@ def getCurrentRate():
 
 
 def googleSignInFunction(request):
+    # make secrets.json manually with data from env (see google auth docs)
     secrets = {"web": {"client_id": os.getenv('GOOGLE_OAUTH_CLIENT_ID'),
                         "project_id": os.getenv('GOOGLE_PROJECT_ID'),
                         "auth_uri": "https://accounts.google.com/o/oauth2/auth",
@@ -103,10 +97,12 @@ def googleSignInFunction(request):
                             ]
                         }
                 }
-    flow = google_auth_oauthlib.flow.Flow.from_client_config(secrets, scopes=['email'])
 
-    host = request.get_host()
-    redirect_url = str(host)+'/sign-in/complete/'
+
+#### see google docs for more explanations
+    flow = google_auth_oauthlib.flow.Flow.from_client_config(secrets, scopes=['email']) # start flow to request just email
+    host = request.get_host() # get host dynamically
+    redirect_url = str(host)+'/sign-in/complete/' # redirect to complete page to allow user choose username after their email has been temporarily verified
     flow.redirect_uri = redirect_url
     authorization_url, state = flow.authorization_url(
     # Recommended, enable offline access so that you can refresh an access token without
@@ -116,9 +112,7 @@ def googleSignInFunction(request):
     include_granted_scopes='true',
     # Optional, set prompt to 'consent' will prompt the user for consent
     prompt='consent')
-    print(authorization_url)
-    print('here')
-    return authorization_url
+    return authorization_url    # state must be same as state sent to check and ensure requests and responses have not bee tampered with
 
 
 
@@ -127,38 +121,41 @@ def validateOTP(email, _otp):
     # does object exist
     try: 
         emailCodeObj = EmailCode.objects.get(email = email)
-    except EmailCode.DoesNotExist:
+    except EmailCode.DoesNotExist: # this email has not been submited to us at all
         isValid = False
         return isValid
     
     # has another user claimed this object?
     try:
         cus = Customer.objects.get(email = email)
-        isValid = False
+        isValid = False # someone else has already verified with this email
         return isValid
     except Customer.DoesNotExist:
         pass
 
     # check if code is valid
     if _otp != emailCodeObj.otp:
-        isValid = False
+        isValid = False # otp doesnt match
         return isValid
 
     
     # is their otp still valid?
     timeNow = datetime.now()
-    if checkHasRequested(timeNow, emailCodeObj.updated, 5):
+    if checkHasRequested(timeNow, emailCodeObj.updated, 5): # check otp wasnt sent more than 5 mins ago
         return isValid
     else:
         isValid = False
         return isValid
         
 
-
+# takes and email and checks for unwanted characters. Return 400 and error message if something is wrong with email, else return 200 and sterilized email
 def verifyEmail(_email):
+    # if email is empty string, break
     if _email == "":
         return {'err' : 'You must provide your email', 'status' : 400}
+    # accept A-Z, a-z, 0-9, '@' , '.' , '_' and '+'
     acceptables = string.ascii_letters + string.digits + '@' + '.'+'_'+'-'+'+'
+    # count where first unwanted character was found, if any. Breaks fundtion and return error and character
     counter = 0
     for _ in _email:
         if _ not in acceptables:
@@ -170,11 +167,16 @@ def verifyEmail(_email):
 
 
 
+# buy yuan page
+def buyYuan(request):
 
+    # get request processing
+    rates = getCurrentRate() # get rates
+    context = {'rates': rates}  # make return dict and send with html
+    return render(request, 'base/buy.html', context)
 
 # index
 def index(request):
-    getTimeNow()
     # get current rates
     rates = getCurrentRate()
     # return
@@ -185,10 +187,9 @@ def signIn(request, method):
     # get sign in method
     # call relevant method
     if method == 'google':
-        print('google')
         url = googleSignInFunction(request)
         return HttpResponseRedirect(url)
-
+    # if no relevant method
     context = {'err': 'Something went wrong while trying to trigger this authentication method. Try another method.'}
     return render(request, 'base/index.html', context)
 
@@ -198,47 +199,49 @@ def completeSignIn(request):
     return HttpResponseRedirect('Signed in')
 
 
+# register new users without any third party auth
 def registrationRequest(request):
-
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        email = str(request.POST['email'])
+    if request.method == 'POST': #user submiting form
+        form = UserCreationForm(request.POST) # get the form
+        email = str(request.POST['email']).strip() # get the email user attempts to reg with and convert to string. remove all trailing whitespaces
         # verify otp
-        otp_is_valid = validateOTP(email, str(request.POST['otp']))
+        otp_is_valid = validateOTP(email, str(request.POST['otp'])) # takes email and otp and tries to verify it was the otp sent
         if otp_is_valid and form.is_valid():
-            user = form.save()
-            newCustomer = Customer.objects.create(user = user, email = email)
-            login(request, user)
-            return HttpResponseRedirect(reverse('base:index'))
+            user = form.save() # create user
+            newCustomer = Customer.objects.create(user = user, email = email) # create matching customer object
+            login(request, user) # login the user
+            return HttpResponseRedirect(reverse('base:index')) # send them back home as authenticated user
         else:
+            # if user couldn't be created for some reason
             context = {'err' : 'Invalid email or OTP. Note that OTP is considered invalid after 5 mins.'}
             return render(request, 'base/err.html', context)
-    else:
-        form = UserCreationForm()
-    context = { 'form': form}
-    return render(request, 'base/login.html', context)
+    else: # user requesting form
+        form = UserCreationForm() # django form for creating new users.
+        context = { 'form': form} 
+        return render(request, 'base/login.html', context) # see login form
 
 # get otp and send it back to user
 def getOTP(request):
     # validate email
-    verified_email = verifyEmail(str(request.GET.get('email')).strip())
-    if verified_email['status'] != 200:
+    verified_email = verifyEmail(str(request.GET.get('email')).strip()) # validate that email doesn't contain any unwanted characters.
+    if verified_email['status'] != 200: # if code is not 200, send error message and the unwanted character back to user
         return JsonResponse({'err' : verified_email['err']}, status = verified_email['status'])
-    # check for email in db
+    # check if a regstered user has already used this email
     try:
-        user = User.objects.get(email = verified_email['email'])
+        # if user exist, return error
+        user = User.objects.get(email = verified_email['email']) 
         return JsonResponse({'err' : 'A user with this email already exists.'}, status = 403)
-    except User.DoesNotExist:
+    except User.DoesNotExist: # if none, proceed with email verification
         # generate code
         code = str(random.randint(100000, 999999))
-        # get or create email code obj for that email
+        # get email if this isnt their first verification attempt, it it isnt, create new
         emailCode, created = EmailCode.objects.get_or_create(email = verified_email['email'])
         # get current time
         time_now = datetime.now()
-        # check if user recently requested a code
-        if checkHasRequested(time_now, emailCode.updated, 1):
-            return JsonResponse({'err' : f'You must wait {60 - time_now.second} seconds before you request a new OTP.'}, status = 400)
-        # if not, update the time of code and save it.
+        # check if user recently requested a code in the last 1 min
+        if checkHasRequested(time_now, emailCode.updated, 1): # see function
+            return JsonResponse({'err' : f'You must wait {60 - time_now.second} seconds before you request a new OTP.'}, status = 400) # if time hasnt elapsed, return error and time left to wait
+        # if not, update the time of code and the new code and save it.
         emailCode.updated = time_now
         emailCode.otp = code
         emailCode.save()
@@ -246,6 +249,7 @@ def getOTP(request):
         print(code)
         return JsonResponse({'msg' : 'code sent'} , status = 200)
 
+# logout request
 def logout_request(request):
-    logout(request)
-    return HttpResponseRedirect(reverse('base:index'))
+    logout(request) # log out user
+    return HttpResponseRedirect(reverse('base:index')) # return them back home. Unauthenticated

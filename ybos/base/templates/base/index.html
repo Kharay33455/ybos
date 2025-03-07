@@ -20,7 +20,6 @@
 
     </div>
     <div style="background-color: white;">
-
         <div class="card text-center">
             <div class="card-header">
                 BUY YUAN RATES
@@ -28,7 +27,7 @@
             <div class="card-body">
                 <p class="card-text rates">{{rates.buyRates}}</p>
                 <h5 class="card-title">CNYNGN Live Rates</h5>
-                <a href="#" class="btn btn-success">BUY</a>
+                <a href="{% url 'base:buyYuan' %}" class="btn btn-success">BUY</a>
             </div>
             <div class="card-footer text-body-secondary">
                 {{rates.time}}

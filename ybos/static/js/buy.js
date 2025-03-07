@@ -1,0 +1,121 @@
+// message box to display error and messages.
+const msgBox = document.getElementById('msgBox');
+
+// this function shows messages to user. Ok messages in green, others in red
+function showMessage(message, type) {
+    msgBox.innerHTML = message;
+    if (type === 'proceed') {
+        // chnge text color to gtreen
+        msgBox.style.color = 'green';
+    }
+    else {
+        // change text color to red
+        msgBox.style.color = 'red';
+    }
+}
+
+
+
+// 1 dollar = 1500 naira = 7.28
+// 1 yuan == 206 naira 
+
+/// _yth = yuanToNaira rates and _dtn is dollar to naira rates && _dty = dollarToYuan
+function getDollarToYuan(_ytn, _dtn) {
+    const _dty = (_dtn / _ytn);
+    return _dty;
+}
+
+// takes a number and add commas at thousands to make it user friendly to read
+function commalizeNum(number) {
+    let numAsStr = number.toString(); // convert num to string
+
+    if(numAsStr.length < 4){    // if number isnt in thousands, return as is
+        return numAsStr;
+    }
+
+    let remainder = numAsStr.split('.')[1];// split number into 2 by decimal. remaider is eveythinh after the decimal
+    if (remainder !== undefined){
+        remainder = Array.from(remainder)[1]; // get digits in remainder in an array
+    }
+    else{
+        remainder = 0; // if nothing after decimal, remainder is 0.
+    }
+    const toAdd = remainder > 0 ? 1 : 0; // if remainder at all, add 1
+    numAsStr = numAsStr.split('.')[0]; // this eveything before the decimal
+    const strLen = numAsStr.length; // number length
+    numAsStr = numAsStr + toAdd; // add approximated remainder
+    
+    // if whole num is more than 3, add commas where nessasary
+    if (strLen > 3) {
+        let newStr = '';
+        for (let i = 0; i < strLen; i++) {
+            newStr = newStr + numAsStr[i];
+            if ((strLen - i - 1) % 3 === 0 && i != strLen - 1) {
+                newStr = newStr + ',';
+            }
+            // if decimal encoutered , break.
+            if (numAsStr[i] === '.'){
+                return newStr;
+            }
+        }
+        // return cnum with comma
+        return newStr;
+    }
+    else {
+        // if num was never in the thousands, return as is.
+        return numAsStr;
+    }
+}
+
+// takes a number and remove all that isnt string
+function decommalizeNum(num){
+    // take num as str and convert it to an array
+    let formToEdit = Array.from(num);  
+    // make a array of accptables, check and only apppend to new str chars in acceptables
+    const acceptableNumbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+    let newStr = ''
+    formToEdit.forEach((item) => {
+        if (acceptableNumbers.includes(item)) {
+            newStr = newStr + item;
+        }
+    })
+    // return as number
+    return Number(newStr);
+}
+
+// _ctc = currency being inputed
+function convertCurrency(_ctc) {
+    // get form being inputed
+    const parentForm = document.getElementById(_ctc);
+    // get value of form and remove all that isnt digit
+    let formToEdit = decommalizeNum(parentForm.value);
+    // add commma and set as value of field being edited
+    parentForm.value = commalizeNum(formToEdit);
+
+    // get rates from servers and online resources
+    const rates = document.getElementById('ratesNow').innerHTML;
+    const dollarToNaira = 1500;
+
+    // edit other form values according to what input is being edited
+    switch (_ctc) {
+        case "amountUSD":
+            const dollarToYuan = getDollarToYuan(rates, dollarToNaira)
+            // set yuan val for that usd amount
+            document.getElementById('amountCNY').value = commalizeNum(formToEdit * dollarToYuan);
+            // get naira val for that usd amount
+            document.getElementById('amountNGN').value = commalizeNum(formToEdit * dollarToNaira);
+            break;
+        case "amountNGN":
+            // set dollar field
+            document.getElementById('amountUSD').value = commalizeNum(formToEdit / dollarToNaira);
+            // set yuan field
+            document.getElementById('amountCNY').value = commalizeNum(formToEdit / rates);
+            break;
+        case "amountCNY":
+            // get usd equivalent    
+            document.getElementById('amountUSD').value = commalizeNum(formToEdit/ getDollarToYuan(rates, dollarToNaira));
+            // get naira equivalent
+            document.getElementById('amountNGN').value = commalizeNum(formToEdit * rates);
+            break;
+    }
+}

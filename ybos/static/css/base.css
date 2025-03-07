@@ -120,6 +120,11 @@
     color:white;
 }
 
+#msgBox{
+    font-weight:900;
+    text-align:center;
+}
+
 .center{
     display:flex;
 }

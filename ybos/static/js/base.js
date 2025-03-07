@@ -6,6 +6,7 @@ function loadingScreen(type) {
     loadingScreen.style.zIndex = type === 'show' ? '5' : '1';
 };
 
+// animate other sign in options slide in box
 function animateAuth(_authBox, _type){
     if(_type === 'show'){
         _authBox.classList.add('authAnimation')
@@ -23,12 +24,13 @@ function animateAuth(_authBox, _type){
     }
 }
 
+// trigger the animation
 function callAuth(){
     const authBox = document.getElementById('authCont');
     const pos =  authBox.style.top;
     pos === '100vh' ? animateAuth(authBox, 'show') : animateAuth(authBox, 'hide');
-
 }
+
 // only run this after all HTML, CSS and JS are loading
 window.onload = () => {
     // show fully loaded page
