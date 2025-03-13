@@ -1,6 +1,7 @@
 {% extends 'base/base.html' %}
 {% load static %}
 {% block content %}
+<link rel="stylesheet" href="{% static 'css/transact.css' %}" />
 <div style="min-height:100vh;">
     <div>
         <h1>
@@ -24,7 +25,8 @@
                 </b>
                 <div class="input-group mb-3">
                     <span class="input-group-text">$</span>
-                    <input type="text" class="form-control" aria-label="Amount (to the nearest dollar)" id="amountUSD" oninput="convertCurrency('amountUSD')">
+                    <input type="text" class="form-control" aria-label="Amount (to the nearest dollar)" id="amountUSD"
+                        oninput="convertCurrency('amountUSD')">
                     <span class="input-group-text">.00</span>
                 </div>
                 <br />
@@ -36,18 +38,19 @@
                     </svg>
                 </div>
                 <br />
-                
+
                 <b>
                     You send
                 </b>
 
                 <div class="input-group mb-3">
                     <span class="input-group-text">&#8358;</span>
-                    <input type="text" class="form-control" aria-label="Amount (to the nearest dollar)" id="amountNGN" oninput="convertCurrency('amountNGN')">
+                    <input type="text" class="form-control" aria-label="Amount (to the nearest dollar)" id="amountNGN"
+                        oninput="convertCurrency('amountNGN')">
                     <span class="input-group-text">.00</span>
                 </div>
 
-                <br/>
+                <br />
                 <div class="center horizontal">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" stroke="black" stroke-width="1.5"
                         fill="currentColor" class="bi bi-arrow-down-up" viewBox="0 0 16 16">
@@ -55,14 +58,15 @@
                             d="M11.5 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L11 2.707V14.5a.5.5 0 0 0 .5.5m-7-14a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L4 13.293V1.5a.5.5 0 0 1 .5-.5" />
                     </svg>
                 </div>
-                <br/>
+                <br />
 
                 <b>
                     You receive
                 </b>
                 <div class="input-group mb-3">
                     <span class="input-group-text">&yen;</span>
-                    <input type="text" class="form-control" aria-label="Amount (to the nearest dollar)" id="amountCNY" oninput="convertCurrency('amountCNY')">
+                    <input type="text" class="form-control" aria-label="Amount (to the nearest dollar)" id="amountCNY"
+                        oninput="convertCurrency('amountCNY')">
                     <span class="input-group-text">.00</span>
                 </div>
                 <!--CSRF token-->
@@ -71,7 +75,7 @@
                 </div>
 
                 <div style="display:flex;justify-content:center">
-                    <button class="btn btn-success loadTimeLink">
+                    <button class="btn btn-success loadTimeLink" onclick="sendAmount()">
                         Buy
                     </button>
                 </div>
@@ -86,8 +90,62 @@
     </div>
 </div>
 
-<script src="{% static 'js/buy.js' %}">
 
+
+<div id="transact">
+    <div style="min-height:90vh;">
+        <br /> <br /><br />
+        <!--Main wrapper div-->
+        <div style="width:100%;display:grid; position:relative">
+            <!--Head-->
+            <div id="mainHeadContainer">
+                <h1 style="text-align:center; font-size:30px;">
+                    BUYING &yen;<span id="amount"></span> 
+                </h1>
+                <div style="text-align:right">
+                    <a class="btn btn-warning" href="{% url 'base:endChat' %}">End Transaction</a>
+                </div>
+            </div>
+
+            <!--Messages-->
+            <div id="messages" style="word-break:break-all;">
+            
+            </div>
+            <!--New message container-->
+            <div id="newMessage" style="position:fixed; bottom:0%;">
+                <div style="width:95vw;">
+                    <!--Contents-->
+                    <div style="width:100%;">
+                        <div style="width:100%; border-radius:100vw; padding:1vw; display:grid; grid-template-columns: 14% 44% 14% 14%; gap:1%; justify-content:space-around;">
+                            <div class="messageBoxGrid">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-paperclip" viewBox="0 0 16 16">
+                                    <path d="M4.5 3a2.5 2.5 0 0 1 5 0v9a1.5 1.5 0 0 1-3 0V5a.5.5 0 0 1 1 0v7a.5.5 0 0 0 1 0V3a1.5 1.5 0 1 0-3 0v9a2.5 2.5 0 0 0 5 0V5a.5.5 0 0 1 1 0v7a3.5 3.5 0 1 1-7 0z"/>
+                                  </svg>
+                            </div>
+                            <div class="messageBoxGrid">
+                                <input placeholder="Type your message..." style="width:100%; background:none; outline:none; border:none;"/>
+                            </div>
+                            <div class="messageBoxGrid">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-emoji-smile" viewBox="0 0 16 16">
+                                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                                    <path d="M4.285 9.567a.5.5 0 0 1 .683.183A3.5 3.5 0 0 0 8 11.5a3.5 3.5 0 0 0 3.032-1.75.5.5 0 1 1 .866.5A4.5 4.5 0 0 1 8 12.5a4.5 4.5 0 0 1-3.898-2.25.5.5 0 0 1 .183-.683M7 6.5C7 7.328 6.552 8 6 8s-1-.672-1-1.5S5.448 5 6 5s1 .672 1 1.5m4 0c0 .828-.448 1.5-1 1.5s-1-.672-1-1.5S9.448 5 10 5s1 .672 1 1.5"/>
+                                  </svg>
+                            </div>
+                            <div class="messageBoxGrid" onclick="sendMessage()">
+                                <div style="padding:5% 10%; background-color:#E5C268; border-radius:50vw">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-send" viewBox="0 0 16 16">
+                                        <path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576zm6.787-8.201L1.591 6.602l4.339 2.76z"/>
+                                      </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="{% static 'js/buy.js' %}">
 </script>
 
 

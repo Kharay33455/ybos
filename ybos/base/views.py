@@ -22,6 +22,16 @@ import google_auth_oauthlib.flow
 # load our environmental variables
 load_dotenv()
 
+
+def stripComma(num):
+    newStr = ''
+    counter = 0
+    for _ in num:
+        if _ != ',':
+            newStr += num[counter]
+        counter +=1
+    return newStr
+
 # check when last user requested code. Takes time now, time to compare and the duration period.
 def checkHasRequested(time_now, updated, duration):
     if time_now.day != updated.day: # if it't not the same day
@@ -35,7 +45,26 @@ def checkHasRequested(time_now, updated, duration):
     else:
         value = False
     return value
-    
+
+def endTransaction(_transaction, _remark):
+    try:
+        _transaction.completed = datetime.now()
+        _transaction.wasSuccessful = False
+        _transaction.remark = _remark
+        _transaction.save()
+    except Exception as e:
+        ErrorLog.objects.create(error = e, user = request.user)
+
+def getAllMessages(_transaction):
+    messages = TransactionMessage.objects.filter(transaction = _transaction)
+    sMessages = []
+    for _ in messages:
+        if _.image:
+            image = _.image.url
+        else:
+            image = None
+        sMessages.append({'text' : _.text, 'image' : image, 'fromUser' : _.fromUser})
+    return sMessages
 
 # gets the current time
 def getTimeNow():
@@ -115,6 +144,24 @@ def googleSignInFunction(request):
     return authorization_url    # state must be same as state sent to check and ensure requests and responses have not bee tampered with
 
 
+# this function takes an amount and create a new transaction for that user provided
+# they do not have an ongoing transaction
+def newTransaction(_request, _amount):
+    _amount = int(_amount)
+    cus = Customer.objects.get(user = _request.user)
+    existing = Transaction.objects.filter(customer = cus, completed = None)
+    if existing:
+        return existing[0]
+    try:
+        _transactionId = str(random.randint(1000000000000000, 9999999999999999999))
+        new_transaction = Transaction.objects.create(customer = cus, amount = str(_amount), transactionId = _transactionId)
+        TransactionMessage.objects.create(transaction = new_transaction, text = f'Requesting address for {_amount} Yuan.', fromUser = True)
+        return new_transaction
+    except Exception as e:
+        ErrorLog.objects.create(error = e, user = _request.user)
+        return 2
+
+
 
 def validateOTP(email, _otp):
     isValid = True
@@ -169,7 +216,33 @@ def verifyEmail(_email):
 
 # buy yuan page
 def buyYuan(request):
-
+    # handle post
+    if request.method == 'POST':
+        # state variables
+        nairaToYuan = 206
+        nairaToDollar = 1500
+        # get amount as int, return error if can't
+        try:
+            amount = stripComma(request.POST['amount'])
+            amount = int(amount)
+            if amount < 100:
+                return JsonResponse({'err' : 'Least tradable amount is 100 CNY.'}, status = 403)
+        except:
+            return JsonResponse({'err' : 'Invalid amount'}, status = 403)
+        # create new transaction
+        transaction = newTransaction(request, amount)
+        if transaction== 2:
+            return JsonResponse({'err' : 'An unexpected error has occured.'}, status = 403)
+        amount = transaction.amount # set to amount in case user is completing existing transaction and not startuing new
+        # convert to naira
+        amountInNaira = int(amount) * int(nairaToYuan)
+        # convert to dollar to 2 decimal places
+        amountInDollar = round(float(amountInNaira / nairaToDollar), 2)
+        # get all messages pertaining to transaction
+        messages = getAllMessages(transaction)
+        # return values
+        return JsonResponse({'amountInNaira' : amountInNaira, 'amountInDollar' : amountInDollar,'amountInYuan' : amount, 'transactionId' : transaction.transactionId, 'messages' : messages} , status = 200)
+        
     # get request processing
     rates = getCurrentRate() # get rates
     context = {'rates': rates}  # make return dict and send with html
@@ -253,3 +326,14 @@ def getOTP(request):
 def logout_request(request):
     logout(request) # log out user
     return HttpResponseRedirect(reverse('base:index')) # return them back home. Unauthenticated
+
+def endChat(request):
+    # get user customer object
+    _cus = Customer.objects.get(user = request.user)
+    # end all trnasactions for this user
+    transactions = Transaction.objects.filter(customer = _cus, wasSuccessful = None, completed = None)
+    for _ in transactions:
+        #end transaction
+        endTransaction(_, 'Aborted by customer.')
+    return HttpResponseRedirect(reverse('base:buyYuan'))
+    

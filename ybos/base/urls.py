@@ -10,5 +10,6 @@ urlpatterns = [
     path('completeSignIn/', completeSignIn, name='complete'),
     path('ybos/get-otp/', getOTP, name='getOTP'),
     path('logout/', logout_request, name = 'logout'),
-    path('buy-yuan', buyYuan, name = 'buyYuan')
+    path('buy-yuan', buyYuan, name = 'buyYuan'),
+    path('end-transactions', endChat, name='endChat')
 ]
