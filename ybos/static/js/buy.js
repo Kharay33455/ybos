@@ -122,27 +122,39 @@ function convertCurrency(_ctc) {
     }
 }
 
+const appendSingleMessage = (_fromUser, _image, _text) => {
+    const new_message = document.createElement("div"); // create new div
+    new_message.classList.add('newMessageDiv')
+    _fromUser && new_message.classList.add('fromUser'); // add styling send/received
+
+    if (_image) {    // only append image if exists
+        const newMsgImg = document.createElement('img');// create elem
+        newMsgImg.src = _image;  // add source
+        newMsgImg.classList.add('newMsgImg');   // style image
+        new_message.appendChild(newMsgImg); // append to the new message div
+    }
+
+    if (_text) { // if text in message
+        const newMsgTxt = document.createElement('p'); // create new paragraph
+        newMsgTxt.innerHTML = _text; // append the html to the text
+        newMsgTxt.classList.add('newMsgTxt');   // style it up
+        new_message.appendChild(newMsgTxt); // append to new message div
+    }
+    return new_message
+
+}
+
 // this function take all the messages returned from server and displayed them in a styled list.
 function appendMessagesToBox(_messages) {
     const msgListContainer = document.getElementById('messages'); // get text container
     _messages.forEach((item) => {   // loop through all
-        const new_message = document.createElement("div"); // create new div
-        new_message.classList.add('newMessageDiv')
-        item['fromUser'] && new_message.classList.add('fromUser'); // add styling send/received
-        if (item['image']) {    // only append image if exists
-            const newMsgImg = document.createElement('img');// create elem
-            newMsgImg.src = item['image'];  // add source
-            newMsgImg.classList.add('newMsgImg');   // style image
-            new_message.appendChild(newMsgImg); // append to the new message div
-        }
-        if (item['text']) { // if text in message
-            const newMsgTxt = document.createElement('p'); // create new paragraph
-            newMsgTxt.innerHTML = item['text']; // append the html to the text
-            newMsgTxt.classList.add('newMsgTxt');   // style it up
-            new_message.appendChild(newMsgTxt); // append to new message div
-        }
-        msgListContainer.appendChild(new_message);  // append the new message to the message box
+        msgListContainer.appendChild(appendSingleMessage(item['fromUser'], item['image'], item['text']));  // append the new message to the message box
     })
+    msgListContainer.scrollBy({
+        top: 1000000,  // Scroll down by 100 pixels
+        left: 0,  // Scroll right by 50 pixels
+        behavior: 'smooth'  // Apply smooth scrolling
+    });
 }
 
 async function sendAmount() {
@@ -188,7 +200,14 @@ async function sendAmount() {
         );
 
         transWS.onmessage = function (e) {
-            console.log(e.data);
+            const resp = JSON.parse(e.data);
+            const msgListContainer = document.getElementById('messages'); // get text container
+            msgListContainer.appendChild(appendSingleMessage(resp['fromUser'], resp['image'], resp['message']));  // append the new message to the message box
+            msgListContainer.scrollBy({
+                top: 100,  // Scroll down by 100 pixels
+                left: 0,  // Scroll right by 50 pixels
+                behavior: 'smooth'  // Apply smooth scrolling
+            });
         };
 
         transWS.onclose = function (e) {
@@ -207,3 +226,42 @@ async function sendAmount() {
 
 }
 
+// takes an image and converts it to base64
+const convertImageToBase64 = (_imageFile) => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = function () {
+            resolve(reader.result);
+        };
+        reader.onerror = function () {
+            reject("Error reading file");
+        };
+        reader.readAsDataURL(_imageFile);
+
+    })
+}
+
+const sendMessage = async () => {
+    const textBox = document.getElementById('textBox'); // get text box
+    const imageField = document.getElementById('imageToSend');  // get image field
+    let base64Img = "";  // stores image in encoded format.. stores an empty string if no image is provided
+    if (imageField.files[0]) {  // encode image if it exists
+        base64Img = await convertImageToBase64(imageField.files[0]);
+    }
+    if (ws) {
+        ws.send(JSON.stringify({ "text": textBox.value, "image": base64Img }));
+        textBox.value = "";
+        imageField.value = "";
+        document.getElementById('selectedImg').src = "";
+    }
+}
+
+// append image to form when user has seleceted an image. makes them aware an imiage has been selecetd
+const doStuff = async () => {
+    const valueOfImage = document.getElementById('imageToSend');
+    if (valueOfImage.files[0]) {
+        const showTempImage = document.getElementById('selectedImg');
+        showTempImage.src = await convertImageToBase64(valueOfImage.files[0]);
+    }
+
+}
