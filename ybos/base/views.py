@@ -59,6 +59,7 @@ def getAllMessages(_transaction):
     messages = TransactionMessage.objects.filter(transaction = _transaction)
     sMessages = []
     for _ in messages:
+        _.save()
         if _.image:
             image = _.image.url
         else:

@@ -56,3 +56,11 @@ class TransactionMessage(models.Model):
 
     def __str__(self):
         return f'Message for transaction {self.transaction.transactionId}'
+
+    # this portion of code endit the django save mrthod
+    #when objects are saved, this code runs.
+    def save(self, **kwargs):
+        # send broadcast to users in chat
+        
+        # call django super save to tak eover save.
+        super().save(**kwargs)
