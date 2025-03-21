@@ -115,17 +115,29 @@
                                 </ul>
 
 {% if request.user.is_authenticated %}
+<!--Display profile and logoit button side by side-->
+<div style="display:flex; justify-content:space-around">
+            <div style="font-size:xx-large; color:white; background-color:#E5C268; width:fit-content; padding:2%; border-radius:25%; cursor:pointer;">
+                &nbsp;{{request.user.username | slice:":1" | capfirst}}&nbsp;
+            </div>
 
-        <div style="font-size:xx-large; color:white; background-color:#E5C268; width:fit-content; padding:2%; border-radius:25%; cursor:pointer;">
-            &nbsp;{{request.user.username | slice:":1" | capfirst}}&nbsp;
-        </div>
+            <!--Pin button down of flex end-->
+            <div style="display:flex; align-items:flex-end;">
+                <div>
+                    <!--Bootstrap classes-->
+                    <a href="{% url 'base:logoutRequest' %}" class="btn btn-danger">
+                        Log out
+                    </a>
+                </div>
+            </div>
+</div>
 
 {% else %}
                                 <div>
 
                                     <!--Log in and sign in button-->
                                     <div style="display: flex; justify-content: space-evenly;">
-                                        <a class="buttonElem" style="background-color: green;" href="">
+                                        <a class="buttonElem" style="background-color: green;" href="{% url 'base:loginRequest' %}">
                                             Log In
                                         </a>
                                         <a class="buttonElem" style="background-color: orange;" href="{% url 'base:ybosSignIn' %}">

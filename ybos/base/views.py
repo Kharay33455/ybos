@@ -2,9 +2,9 @@
 from django.shortcuts import render # to render html
 from django.urls import reverse # generate url related to app only
 from django.contrib.auth.models import User # user model
-from django.contrib.auth import authenticate, login, logout # handle auth
+from django.contrib.auth import authenticate, login, logout, authenticate # handle auth
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse # responses
-from django.contrib.auth.forms import UserCreationForm # user creation form
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm # Django forms
 
 # python modules
 import requests # used to query API
@@ -275,6 +275,8 @@ def completeSignIn(request):
 
 # register new users without any third party auth
 def registrationRequest(request):
+    if request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('base:index'))
     if request.method == 'POST': #user submiting form
         form = UserCreationForm(request.POST) # get the form
         email = str(request.POST['email']).strip() # get the email user attempts to reg with and convert to string. remove all trailing whitespaces
@@ -292,7 +294,7 @@ def registrationRequest(request):
     else: # user requesting form
         form = UserCreationForm() # django form for creating new users.
         context = { 'form': form} 
-        return render(request, 'base/login.html', context) # see login form
+        return render(request, 'base/reg.html', context) # see login form
 
 # get otp and send it back to user
 def getOTP(request):
@@ -338,3 +340,23 @@ def endChat(request):
         endTransaction(_, 'Aborted by customer.')
     return HttpResponseRedirect(reverse('base:buyYuan'))
     
+
+# this allows users to log in ad out of their accounts
+def login_request(request):
+    if request.user.is_authenticated:   # if user is already authenticated, just redirect them home
+        return HttpResponseRedirect(reverse('base:index'))
+    if request.method == 'POST':    # if user is submiting a new request, clean data and attempt auth
+        _username = str(request.POST['username']).strip()
+        _password = str(request.POST['password']).strip()
+        user = authenticate(username= _username, password = _password)
+        if user is not None:    # user exist with these datails?    login and redirect home.
+            login(request, user)
+            return HttpResponseRedirect(reverse('base:index'))
+        else:   # user doesnt?  show form to reattempt login and display incorrect details error message
+            form = AuthenticationForm()
+            context = {'err' : 'Incorrect username or password.', 'form' : form}
+            return render(request, 'base/login.html', context)
+    # if user has sent a get request?   get django form to return, style on front end.
+    form = AuthenticationForm()
+    context = {'form' : form}
+    return render(request, 'base/login.html', context)

@@ -12,7 +12,7 @@ label{
     display:none;
 }
 
-#id_username, #id_password1, #id_password2, #token {
+#id_username, #id_password1, #id_password2, #token, #id_password {
     width : 90vw;
     border:none;
     border-bottom:solid;

@@ -8,3 +8,4 @@
 6. End transactions from history page
 7. sell yuan
 8. admin can reply to users(next)
+9. Registered users can log in(done)

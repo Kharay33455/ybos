@@ -9,7 +9,8 @@ urlpatterns = [
     path('ybos/', registrationRequest, name='ybosSignIn'),
     path('completeSignIn/', completeSignIn, name='complete'),
     path('ybos/get-otp/', getOTP, name='getOTP'),
-    path('logout/', logout_request, name = 'logout'),
-    path('buy-yuan', buyYuan, name = 'buyYuan'),
-    path('end-transactions', endChat, name='endChat')
+    path('logout/', logout_request, name = 'logoutRequest'),
+    path('buy-yuan/', buyYuan, name = 'buyYuan'),
+    path('end-transactions/', endChat, name='endChat'),
+    path('login/', login_request, name='loginRequest')
 ]
