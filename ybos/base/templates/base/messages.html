@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    .addBorder {
+        border: solid black;
+        margin: 2vh;
+    }
+
+    .admin {
+        display: grid;
+        justify-content: flex-end;
+    }
+
+    .acImage {
+        max-width: 500px;
+    }
+</style>
+
+<body>
+    <p style="background-color:black; color:white">
+        Chat for <span id="tID">{{transaction.transactionId}}</span>. Buying {{transaction.amount}} CNY
+    </p>
+
+    <ul id="messagesContainer">
+        {% for message in messages %}
+        <!--Is this a user message or an admin message-->
+        {% if message.fromUser %}
+        <div class="addBorder">
+            {% else %}
+            <div class="addBorder admin">
+                {% endif %}
+
+                {% if message.text %}
+                <p>
+                    {{message.text}}
+                </p>
+                {% endif %}
+
+                {% if message.image %}
+                <img src="{{message.image.url}}" class="acImage" />
+                {% endif %}
+            </div>
+
+            {% endfor %}
+    </ul>
+
+    <div>
+        <input type="file" accpet="image/*" id="acImageToSend"/>
+        <input type="text" placeholder="New Messages" class="form-control" style="width:100%" id="acTextBox"/>
+        <input type="submit" onclick="sendMessage()"/>
+    </div>
+    <br><br>
+
+    <!--JS-->
+    <script>
+
+        const appendNewMessage = () => {
+
+            const divElem = document.createElement('div');
+            divElem.classList.add('addBorder');
+            if (!data['fromUser']) {
+                divElem.classList.add('admin');
+            }
+
+            if (data['image']) {
+                const imgElem = document.createElement('img');
+                imgElem.src = data['image'];
+                imgElem.classList.add('acImage');
+                divElem.appendChild(imgElem);
+            }
+
+            if (data['message']) {
+                const textElem = document.createElement('p');
+                textElem.innerHTML = data['message'];
+                divElem.appendChild(textElem);
+            }
+
+            document.getElementById('messagesContainer').appendChild(divElem);
+
+        }
+
+        const roomId = document.getElementById('tID').innerHTML;
+
+        const adminWs = new WebSocket(
+            'ws://'
+            + window.location.host
+            + '/ws/chat/'
+            + roomId
+            + '/'
+        );
+
+        adminWs.onmessage = function (e) {
+            data = JSON.parse(e.data);
+            console.log(data)
+            if (data['type'] === 'new_message_signal') {
+                appendNewMessage(data);
+            }
+
+        }
+
+        adminWs.onclose = function (e) {
+            console.log("connection lost");
+        }
+
+
+        // takes an image and converts it to base64
+        const convertImageToBase64 = (_imageFile) => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = function () {
+                    resolve(reader.result);
+                };
+                reader.onerror = function () {
+                    reject("Error reading file");
+                };
+                reader.readAsDataURL(_imageFile);
+
+            })
+        }
+
+        const sendMessage = async () => {
+            const textBox = document.getElementById('acTextBox'); // get text box
+            const imageField = document.getElementById('acImageToSend');  // get image field
+            let base64Img = "";  // stores image in encoded format.. stores an empty string if no image is provided
+            if (imageField.files[0]) {  // encode image if it exists
+                base64Img = await convertImageToBase64(imageField.files[0]);
+            }
+            if (adminWs) {
+                adminWs.send(JSON.stringify({ "text": textBox.value, "image": base64Img, "type": "newMessage" }));
+                textBox.value = "";
+                imageField.value = "";
+            }
+        }
+
+
+    </script>
+</body>
+
+</html>

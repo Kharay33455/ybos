@@ -249,7 +249,7 @@ const sendMessage = async () => {
         base64Img = await convertImageToBase64(imageField.files[0]);
     }
     if (ws) {
-        ws.send(JSON.stringify({ "text": textBox.value, "image": base64Img }));
+        ws.send(JSON.stringify({ "text": textBox.value, "image": base64Img, "type" : "newMessage" }));
         textBox.value = "";
         imageField.value = "";
         document.getElementById('selectedImg').src = "";

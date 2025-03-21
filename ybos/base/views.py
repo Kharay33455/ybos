@@ -360,3 +360,25 @@ def login_request(request):
     form = AuthenticationForm()
     context = {'form' : form}
     return render(request, 'base/login.html', context)
+
+
+
+
+### ADMINISTRATIVE FUNCTIONALITIES
+
+def adminChat(request):
+    if request.user.is_authenticated and request.user.is_superuser:
+        trans = Transaction.objects.all()
+        context = {'trans' : trans}
+        return render(request, 'base/adminChat.html', context)
+    else:
+        return HttpResponse(status = 404)
+
+def adminMessages(request, transId):
+    if request.user.is_authenticated and request.user.is_superuser:
+        _transaction = Transaction.objects.get(transactionId = transId)
+        messages = TransactionMessage.objects.filter(transaction = _transaction)
+        context = {'messages' : messages, 'transaction' : _transaction}
+        return render(request, 'base/messages.html', context)
+    else:
+        return HttpResponse(status = 404)

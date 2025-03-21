@@ -9,3 +9,4 @@
 7. sell yuan
 8. admin can reply to users(next)
 9. Registered users can log in(done)
+10. refacter def checkMessageUser(_transId, _user): it should not have the _transId param . It is not neededd
