@@ -24,7 +24,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         user = self.scope['user']
 
         # make sure only transaction initiator and admin can access socket
-        if not await sync_to_async(checkMessageUser)(self, route, user) and not user.is_superuser:
+        if not await sync_to_async(checkMessageUser)(self, user) and not user.is_superuser:
             await self.close()
 
         self.room_group_name = f'trans_{route}' # add group name to allow layers
@@ -73,13 +73,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
         image = event["image"]
         fromUser = event['fromUser']
         # check they should be in this chat
-        if self.scope['user'].is_superuser or await sync_to_async(checkMessageUser)(self, self.scope['url_route']['kwargs']['room_name'], self.scope['user']) : #Check that this user is the same user that originally initiated this transaction
+        if self.scope['user'].is_superuser or await sync_to_async(checkMessageUser)(self,  self.scope['user']): #Check that this user is the same user that originally initiated this transaction
             await self.send(text_data=json.dumps({"message": message, "image" : image, "fromUser" : fromUser, 'type' : 'new_message_signal'}))
 
 
 
 
-def checkMessageUser(self, _transId, _user):
+def checkMessageUser(self, _user):
     print("cjecking")
     transaction = Transaction.objects.get(transactionId = self.scope['url_route']['kwargs']['room_name'])
     print(_user)
