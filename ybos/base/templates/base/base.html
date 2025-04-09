@@ -101,10 +101,10 @@
                                             TRANSACT
                                         </a>
                                         <ul class="dropdown-menu dropdown-menu-dark">
-                                            <li><a class="loadTimeLink dropdown-item ybosButton" href="{% url 'base:buyYuan' %}">
+                                            <li><a class="loadTimeLink dropdown-item ybosButton" href="{% url 'base:transactYuan' 'buy' %}">
                                                     BUY YUAN
                                                 </a></li>
-                                            <li><a class="loadTimeLink dropdown-item ybosButton orange" href="#">SELL
+                                            <li><a class="loadTimeLink dropdown-item ybosButton orange" href="{% url 'base:transactYuan' 'sell' %}">SELL
                                                     YUAN</a></li>
                                             <li>
                                                 <hr class="dropdown-divider">

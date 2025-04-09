@@ -1,0 +1,101 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/transact.css' %}" />
+<div style="min-height:100vh; overflow-y:scroll !important">
+    <div>
+        <h1>
+            {% if transType == 'buy' %}Buy{% else %}Sell{% endif %} Yuan
+        </h1>
+        <div class="container-fluid bg-body-tertiary" style="padding:3vh; font-weight:700;">
+
+            YBOS Exchange Rates: <span id="ratesNow">{% if transType == 'buy' %}{{rates.buyRates}}{%else%}{{rates.sellRates}}{% endif %}</span> CNY = 1 USD at {{rates.time}}
+        </div>
+
+        <div id="msgBox">
+
+        </div>
+    </div>
+    <div style="display:grid; justify-content:center; margin:5vh 0vh">
+        <div class="card">
+            <h5 class="card-header">Enter your amount.</h5>
+            <form method="post" action="{% url 'base:transactYuan' transType %}">
+                {% csrf_token %}
+                <div class="card-body">
+                    <b>
+                        You send
+                    </b>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">$</span>
+                        <input type="text" class="form-control" aria-label="Amount (to the nearest dollar)" id="amountUSD"
+                            oninput="convertCurrency('amountUSD')" name="amount">
+                        <span class="input-group-text">.00</span>
+                    </div>
+                    <br />
+                    <div class="center horizontal">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" stroke="black" stroke-width="1.5"
+                            fill="currentColor" class="bi bi-arrow-down-up" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd"
+                                d="M11.5 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L11 2.707V14.5a.5.5 0 0 0 .5.5m-7-14a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L4 13.293V1.5a.5.5 0 0 1 .5-.5" />
+                        </svg>
+                    </div>
+                    <br />
+    
+                    <b>
+                        You send
+                    </b>
+    
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">&#8358;</span>
+                        <input type="text" class="form-control" aria-label="Amount (to the nearest dollar)" id="amountNGN"
+                            oninput="convertCurrency('amountNGN')">
+                        <span class="input-group-text">.00</span>
+                    </div>
+    
+                    <br />
+                    <div class="center horizontal">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" stroke="black" stroke-width="1.5"
+                            fill="currentColor" class="bi bi-arrow-down-up" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd"
+                                d="M11.5 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L11 2.707V14.5a.5.5 0 0 0 .5.5m-7-14a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L4 13.293V1.5a.5.5 0 0 1 .5-.5" />
+                        </svg>
+                    </div>
+                    <br />
+    
+                    <b>
+                        You receive
+                    </b>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">&yen;</span>
+                        <input type="text" class="form-control" aria-label="Amount (to the nearest dollar)" id="amountCNY"
+                            oninput="convertCurrency('amountCNY')">
+                        <span class="input-group-text">.00</span>
+                    </div>
+    
+                    <div style="display:flex;justify-content:center">
+                        {% if transType == 'buy' %}
+                        <button class="btn btn-success loadTimeLink" type="submit">
+                            Buy
+                        {% else %}
+                        <button class="btn btn-danger loadTimeLink" type="submit">
+                            Sell
+                        {% endif %}
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div style="display:grid; font-weight:500; padding:0 5vw; margin-top:10vh;" class="center vertical">
+        "Please note that currency rates can fluctuate, so prices may change slightly. However, don't worry – the
+        difference won’t be more than ¥1. When you click 'Buy', the rate at that moment will be the one used for your
+        transaction. We’ve got you covered!"
+    </div>
+</div>
+
+<script src="{% static 'js/buy.js' %}">
+</script>
+
+
+{% endblock %}

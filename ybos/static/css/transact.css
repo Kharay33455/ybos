@@ -16,8 +16,14 @@
     opacity: 0;
 }
 
-* {
-    overflow-y: hidden;
+.class {
+    display:grid;
+}
+.horizontally{
+    justify-content:center;
+}
+.vertically{
+    align-items:center;
 }
 
 #messages {
@@ -32,7 +38,7 @@
     overflow-x: scroll !important;
     word-break: break-all;
     background-color: white;
-
+    bottom:0%;
 }
 
 .messageBoxGrid {
@@ -94,6 +100,10 @@
     .fromUser {
         margin-left: 25vw;
 
+    }
+
+    #newMessage {
+        bottom:10%;
     }
 }
 

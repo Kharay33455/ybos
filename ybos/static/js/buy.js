@@ -1,5 +1,3 @@
-let ws = undefined;
-
 // message box to display error and messages.
 const msgBox = document.getElementById('msgBox');
 
@@ -122,6 +120,12 @@ function convertCurrency(_ctc) {
     }
 }
 
+
+
+
+
+// append single new meessage to box
+
 const appendSingleMessage = (_fromUser, _image, _text) => {
     const new_message = document.createElement("div"); // create new div
     new_message.classList.add('newMessageDiv')
@@ -144,87 +148,7 @@ const appendSingleMessage = (_fromUser, _image, _text) => {
 
 }
 
-// this function take all the messages returned from server and displayed them in a styled list.
-function appendMessagesToBox(_messages) {
-    const msgListContainer = document.getElementById('messages'); // get text container
-    _messages.forEach((item) => {   // loop through all
-        msgListContainer.appendChild(appendSingleMessage(item['fromUser'], item['image'], item['text']));  // append the new message to the message box
-    })
-    msgListContainer.scrollBy({
-        top: 1000000,  // Scroll down by 100 pixels
-        left: 0,  // Scroll right by 50 pixels
-        behavior: 'smooth'  // Apply smooth scrolling
-    });
-}
 
-async function sendAmount() {
-    const form = new FormData();
-    const amount = document.getElementById('amountCNY').value;
-    // append the amount in yuan
-    form.append('amount', amount);
-    const csrf = document.getElementsByName('csrfmiddlewaretoken')[0];
-    console.log(csrf.value);
-
-    const host = (window.location.host).toString();
-    resp = await fetch('/buy-yuan',
-        {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': csrf.value
-            },
-            body: form
-        }
-    )
-
-    const result = await resp.json();
-    if (resp.status === 200) {
-        // show transaction chat
-        const transBox = document.getElementById('transact');
-        transBox.style.opacity = '1';
-        transBox.style.zIndex = '8';
-
-        console.log('BAck');
-        console.log(commalizeNum(await result['amountInNaira']), result['amountInDollar'], commalizeNum(result['amountInDollar']) + '.' + (result['amountInDollar']).toString().split('.')[1]);
-        document.getElementById('amount').innerHTML = commalizeNum(await result['amountInYuan']);
-        const messages = result['messages'];
-        // append all the mwssages to the message box
-        appendMessagesToBox(messages);
-        // open new websocket
-        const transId = result['transactionId'];
-        const transWS = new WebSocket(
-            'ws://'
-            + window.location.host
-            + '/ws/chat/'
-            + transId
-            + '/'
-        );
-
-        transWS.onmessage = function (e) {
-            const resp = JSON.parse(e.data);
-            const msgListContainer = document.getElementById('messages'); // get text container
-            msgListContainer.appendChild(appendSingleMessage(resp['fromUser'], resp['image'], resp['message']));  // append the new message to the message box
-            msgListContainer.scrollBy({
-                top: 100,  // Scroll down by 100 pixels
-                left: 0,  // Scroll right by 50 pixels
-                behavior: 'smooth'  // Apply smooth scrolling
-            });
-        };
-
-        transWS.onclose = function (e) {
-            console.log('socket closed');
-        };
-        loadingScreen('hide');
-        ws = transWS;
-    }
-    else {
-
-        if (result['err']) {
-            showMessage(result['err'], 'err');
-        }
-    }
-    loadingScreen('hide');
-
-}
 
 // takes an image and converts it to base64
 const convertImageToBase64 = (_imageFile) => {

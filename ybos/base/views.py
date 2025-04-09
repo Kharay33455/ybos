@@ -48,10 +48,11 @@ def checkHasRequested(time_now, updated, duration):
 
 def endTransaction(_transaction, _remark):
     try:
-        _transaction.completed = datetime.now()
-        _transaction.wasSuccessful = False
-        _transaction.remark = _remark
-        _transaction.save()
+        if not _transaction.completed:
+            _transaction.completed = datetime.now()
+            _transaction.wasSuccessful = False
+            _transaction.remark = _remark
+            _transaction.save()
     except Exception as e:
         ErrorLog.objects.create(error = e, user = request.user)
 
@@ -59,7 +60,6 @@ def getAllMessages(_transaction):
     messages = TransactionMessage.objects.filter(transaction = _transaction)
     sMessages = []
     for _ in messages:
-        _.save()
         if _.image:
             image = _.image.url
         else:
@@ -216,12 +216,11 @@ def verifyEmail(_email):
 
 
 # buy yuan page
-def buyYuan(request):
+def transactYuan(request, transType):
+    if transType != 'buy' and transType != 'sell':
+        return HttpResponse(status = 404)
     # handle post
     if request.method == 'POST':
-        # state variables
-        nairaToYuan = 206
-        nairaToDollar = 1500
         # get amount as int, return error if can't
         try:
             amount = stripComma(request.POST['amount'])
@@ -234,20 +233,30 @@ def buyYuan(request):
         transaction = newTransaction(request, amount)
         if transaction== 2:
             return JsonResponse({'err' : 'An unexpected error has occured.'}, status = 403)
-        amount = transaction.amount # set to amount in case user is completing existing transaction and not startuing new
+        #amount = transaction.amount # set to amount in case user is completing existing transaction and not startuing new
         # convert to naira
-        amountInNaira = int(amount) * int(nairaToYuan)
+        #amountInNaira = int(amount) * int(nairaToYuan)
         # convert to dollar to 2 decimal places
-        amountInDollar = round(float(amountInNaira / nairaToDollar), 2)
+        #amountInDollar = round(float(amountInNaira / nairaToDollar), 2)
         # get all messages pertaining to transaction
-        messages = getAllMessages(transaction)
+        #messages = getAllMessages(transaction)
         # return values
-        return JsonResponse({'amountInNaira' : amountInNaira, 'amountInDollar' : amountInDollar,'amountInYuan' : amount, 'transactionId' : transaction.transactionId, 'messages' : messages} , status = 200)
+        transId = transaction.transactionId
+        return HttpResponseRedirect(reverse('base:chat', args=(transId,)))
+        #return JsonResponse({'amountInNaira' : amountInNaira, 'amountInDollar' : amountInDollar,'amountInYuan' : amount, 'transactionId' : transaction.transactionId, 'messages' : messages} , status = 200)
         
     # get request processing
     rates = getCurrentRate() # get rates
-    context = {'rates': rates}  # make return dict and send with html
-    return render(request, 'base/buy.html', context)
+    context = {'rates': rates, 'transType' : transType}  # make return dict and send with html
+    return render(request, 'base/transact.html', context)
+
+def transactionChat(request, transId):
+    if not request.user.is_authenticated:
+        return HttpResponseRedircet(reverse('base:home'))
+    _transaction = Transaction.objects.get(transactionId = transId)
+    messages = getAllMessages(_transaction)
+    context = {'transaction' : _transaction, 'messages' : messages}
+    return render(request, 'base/chat.html', context)
 
 # index
 def index(request):
@@ -338,7 +347,7 @@ def endChat(request):
     for _ in transactions:
         #end transaction
         endTransaction(_, 'Aborted by customer.')
-    return HttpResponseRedirect(reverse('base:buyYuan'))
+    return HttpResponseRedirect(reverse('base:index'))
     
 
 # this allows users to log in ad out of their accounts

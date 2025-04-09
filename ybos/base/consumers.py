@@ -82,7 +82,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
 def checkMessageUser(self, _user):
     print("cjecking")
     transaction = Transaction.objects.get(transactionId = self.scope['url_route']['kwargs']['room_name'])
-    print(_user)
+    if transaction.completed:   # if this transaction is already completed, reject the connection regardless
+        return False
     if _user == transaction.customer.user:
         return True
     else:

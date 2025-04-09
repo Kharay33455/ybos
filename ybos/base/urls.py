@@ -10,10 +10,10 @@ urlpatterns = [
     path('completeSignIn/', completeSignIn, name='complete'),
     path('ybos/get-otp/', getOTP, name='getOTP'),
     path('logout/', logout_request, name = 'logoutRequest'),
-    path('buy-yuan', buyYuan, name = 'buyYuan'),
+    path('<slug:transType>-yuan', transactYuan, name = 'transactYuan'),
     path('end-transactions/', endChat, name='endChat'),
     path('login/', login_request, name='loginRequest'),
     path('admin-chat/', adminChat, name = 'adminChat'),
     path('admin-chat/<slug:transId>', adminMessages, name = 'adminMessages'),
-
+    path('chat/<slug:transId>', transactionChat, name='chat')
 ]
