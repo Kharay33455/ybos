@@ -7,7 +7,7 @@
     <!--HEad-->
     <div class="center horizontally">
         <h1>
-            Buying ${{transaction.amount}} yuan.
+            {% if transaction.isBuy %}Buying{% else %}Selling{%endif%} ${{transaction.amount}} yuan.
         </h1>
     </div>
 

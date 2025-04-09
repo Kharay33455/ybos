@@ -25,6 +25,7 @@ class EmailCode(models.Model):
 # stores info about a transaction
 class Transaction(models.Model):
     transactionId = models.CharField(max_length = 20) # the id of said transaction
+    isBuy = models.BooleanField(default = True)
     customer = models.ForeignKey(Customer, on_delete = models.CASCADE)  # the customer who has initated the transaction
     created = models.DateTimeField(auto_now_add = True) # when it was initiated
     completed = models.DateTimeField(default = None, blank = True, null = True) # is it completed, if not, this is none, if yes, this is completion date.

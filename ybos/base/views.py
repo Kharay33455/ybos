@@ -147,7 +147,7 @@ def googleSignInFunction(request):
 
 # this function takes an amount and create a new transaction for that user provided
 # they do not have an ongoing transaction
-def newTransaction(_request, _amount):
+def newTransaction(_request, _amount, transType):
     _amount = int(_amount)
     cus = Customer.objects.get(user = _request.user)
     existing = Transaction.objects.filter(customer = cus, completed = None)
@@ -155,14 +155,17 @@ def newTransaction(_request, _amount):
         return existing[0]
     try:
         _transactionId = str(random.randint(1000000000000000, 9999999999999999999))
-        new_transaction = Transaction.objects.create(customer = cus, amount = str(_amount), transactionId = _transactionId)
+        # signify buy or sell
+        if transType == 'buy':
+            isBuy = True
+        else:
+            isBuy = False
+        new_transaction = Transaction.objects.create(customer = cus, amount = str(_amount), transactionId = _transactionId, isBuy = isBuy)
         TransactionMessage.objects.create(transaction = new_transaction, text = f'Requesting address for {_amount} Yuan.', fromUser = True)
         return new_transaction
     except Exception as e:
         ErrorLog.objects.create(error = e, user = _request.user)
         return 2
-
-
 
 def validateOTP(email, _otp):
     isValid = True
@@ -212,13 +215,15 @@ def verifyEmail(_email):
     return {'status' : 200, 'email' : _email}
 
 
-
+### Code byond here navigate pages
 
 
 # buy yuan page
 def transactYuan(request, transType):
     if transType != 'buy' and transType != 'sell':
         return HttpResponse(status = 404)
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('base:loginRequest'))
     # handle post
     if request.method == 'POST':
         # get amount as int, return error if can't
@@ -230,20 +235,11 @@ def transactYuan(request, transType):
         except:
             return JsonResponse({'err' : 'Invalid amount'}, status = 403)
         # create new transaction
-        transaction = newTransaction(request, amount)
+        transaction = newTransaction(request, amount, transType)
         if transaction== 2:
             return JsonResponse({'err' : 'An unexpected error has occured.'}, status = 403)
-        #amount = transaction.amount # set to amount in case user is completing existing transaction and not startuing new
-        # convert to naira
-        #amountInNaira = int(amount) * int(nairaToYuan)
-        # convert to dollar to 2 decimal places
-        #amountInDollar = round(float(amountInNaira / nairaToDollar), 2)
-        # get all messages pertaining to transaction
-        #messages = getAllMessages(transaction)
-        # return values
         transId = transaction.transactionId
         return HttpResponseRedirect(reverse('base:chat', args=(transId,)))
-        #return JsonResponse({'amountInNaira' : amountInNaira, 'amountInDollar' : amountInDollar,'amountInYuan' : amount, 'transactionId' : transaction.transactionId, 'messages' : messages} , status = 200)
         
     # get request processing
     rates = getCurrentRate() # get rates
@@ -252,7 +248,7 @@ def transactYuan(request, transType):
 
 def transactionChat(request, transId):
     if not request.user.is_authenticated:
-        return HttpResponseRedircet(reverse('base:home'))
+        return HttpResponseRedirect(reverse('base:loginRequest'))
     _transaction = Transaction.objects.get(transactionId = transId)
     messages = getAllMessages(_transaction)
     context = {'transaction' : _transaction, 'messages' : messages}
@@ -312,17 +308,13 @@ def getOTP(request):
     if verified_email['status'] != 200: # if code is not 200, send error message and the unwanted character back to user
         return JsonResponse({'err' : verified_email['err']}, status = verified_email['status'])
     # check if a regstered user has already used this email
-    try:
-        # if user exist, return error
+    try:# if user exist, return error
         user = User.objects.get(email = verified_email['email']) 
         return JsonResponse({'err' : 'A user with this email already exists.'}, status = 403)
     except User.DoesNotExist: # if none, proceed with email verification
-        # generate code
-        code = str(random.randint(100000, 999999))
-        # get email if this isnt their first verification attempt, it it isnt, create new
-        emailCode, created = EmailCode.objects.get_or_create(email = verified_email['email'])
-        # get current time
-        time_now = datetime.now()
+        code = str(random.randint(100000, 999999))      # generate code
+        emailCode, created = EmailCode.objects.get_or_create(email = verified_email['email'])       # get email if this isnt their first verification attempt, it it isnt, create new
+        time_now = datetime.now()   # get current time
         # check if user recently requested a code in the last 1 min
         if checkHasRequested(time_now, emailCode.updated, 1): # see function
             return JsonResponse({'err' : f'You must wait {60 - time_now.second} seconds before you request a new OTP.'}, status = 400) # if time hasnt elapsed, return error and time left to wait
@@ -340,6 +332,8 @@ def logout_request(request):
     return HttpResponseRedirect(reverse('base:index')) # return them back home. Unauthenticated
 
 def endChat(request):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('base:loginRequest'))
     # get user customer object
     _cus = Customer.objects.get(user = request.user)
     # end all trnasactions for this user
